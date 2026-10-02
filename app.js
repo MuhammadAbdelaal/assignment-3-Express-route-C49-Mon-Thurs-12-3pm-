@@ -52,7 +52,7 @@ async function saveUsers(users) {
 app.use(express.json());
 // middleware to catch JSON parsing errors and return a 400 Bad Request response
 app.use((err, req, res, next) => {
-  // Check an error thrown by express.json() due to invalid JSON syntax
+  // Check if an error thrown by express.json() due to invalid JSON syntax
   if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
     return res.status(400).json({
       message: "Invalid JSON syntax. Please check your request body.",
@@ -323,7 +323,7 @@ app.get("/user/filter", async (req, res) => {
 // ================================================
 app.get("/user/:id", async (req, res) => {
   try {
-    // 1. Obtain the id from the request
+    // 1. Obtain the id from the request params
     const { id } = req.params;
 
     // 2. Get the existing users
