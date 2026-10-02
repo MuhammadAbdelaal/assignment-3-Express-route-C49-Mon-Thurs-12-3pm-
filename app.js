@@ -246,7 +246,7 @@ app.delete("/user{/:id}", async (req, res) => {
       return res.status(404).json({ message: "User ID not found." });
     }
 
-    // 5. Remove the user from the array using splice
+    // 5. Remove the user from the array
     users.splice(users.indexOf(user), 1);
 
     // 6. Save the updated users
@@ -255,7 +255,7 @@ app.delete("/user{/:id}", async (req, res) => {
     // 7. Return success response (200 OK)
     return res.status(200).json({ message: "User deleted successfully." });
   } catch (error) {
-    console.error("Error deleting user:", error);
+    console.log("Error deleting user:", error);
     return res.status(500).json({ message: "Internal server error." });
   }
 });
