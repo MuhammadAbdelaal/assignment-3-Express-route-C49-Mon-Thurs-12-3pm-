@@ -67,25 +67,33 @@ app.post("/user", async (req, res) => {
   // 1. Obtain data from the request body
   const { name, age, email } = req.body;
 
-  // 2. Email Validation: Check inputs before doing any operations
+  // 2. Email Validation, if no email provided return 400 bad request
+  // and don't create the user
   if (!email) {
     return res.status(400).json({ message: "Email is a required field." });
   }
 
   // 3. Wrap all file operations and logic in a global try/catch
+  // to handle async errors without crashing the server
   try {
-    // Read the file
+    // Read the data from users.json file using getUsers() helper function
     let users = await getUsers();
 
-    // 4. Check if the email already exists
+    // 4. Check if the email already exists in the users array
     const emailExists = users.some((user) => user.email === email);
     if (emailExists) {
       return res.status(400).json({ message: "Email already exists." });
     }
 
-    // 5. Generate a safe incremental ID
-    const newId = users.length > 0 ? users[users.length - 1].id + 1 : 1;
+    // 5. Gerate an auto increamenting ID for the new user
+    // const newId = users.length > 0 ? users[users.length - 1].id + 1 : 1;
+    // writing the same ID logic with if condition instead of ternary operator
 
+    let newId = 1; // default ID if no users in the array
+    if (users.length > 0) {
+      // increment the ID (-1) of the last user by 1
+      newId = users[users.length - 1].id + 1;
+    }
     // 6. Create the new user object
     const newUser = {
       id: newId,
