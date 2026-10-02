@@ -124,8 +124,10 @@ app.post("/user", async (req, res) => {
 // ================================================
 app.patch("/user/:id", async (req, res) => {
   try {
-    // 0. Prevent crash if req.body is undefined
+    // Prevent crash if req.body is undefined when trying to destructure
+    // the data from it in the below logic
     if (!req.body) {
+      // instead send 400 bad request response identifying the error
       return res.status(400).json({ message: "Request body is required." });
     }
 
@@ -135,11 +137,13 @@ app.patch("/user/:id", async (req, res) => {
 
     // 2. Find and validate allowed fields in req.body
     const validKeys = [];
-
+    //if name is provided, string, and not empty
+    // then add it to the validKeys array
     if (name && typeof name === "string" && name.trim().length > 0) {
       validKeys.push("name");
     }
-
+    // if age is provided, number, and not zero
+    // then add it to the validKeys array
     if (Number(age) && age > 0) {
       validKeys.push("age");
     } else if (age === 0 || age === "0") {
@@ -147,6 +151,8 @@ app.patch("/user/:id", async (req, res) => {
     }
 
     if (
+      // if email is provided, string, not empty, and has @ symbol
+      // then add it to the validKeys array
       email &&
       typeof email === "string" &&
       email.trim().length > 0 &&
@@ -155,17 +161,22 @@ app.patch("/user/:id", async (req, res) => {
       validKeys.push("email");
     }
 
-    // 3. EARLY CHECK: If no valid fields were sent, stop early!
+    // 3. If no valid fields at all were sent
+    // return 400 bad request response with message to identify the error
     if (validKeys.length === 0) {
       return res
         .status(400)
         .json({ message: "No valid fields provided to update." });
     }
 
+    // if all validations passed, start getting the existing users
+    // to update the user that has the matching ID
     // 4. Get the existing users
     const users = await getUsers();
 
     // 5. Find the user with the matching ID
+    // id is comming from the request params as a string,
+    // so it must be converted to a number when comparing it
     let user = users.find((user) => user.id === Number(id));
 
     // 6. If user not found, return 404 Not Found
@@ -173,12 +184,20 @@ app.patch("/user/:id", async (req, res) => {
       return res.status(404).json({ message: "User ID not found." });
     }
 
-    // 7. Update ONLY the fields that passed validation in validKeys
-    if (validKeys.includes("name")) user.name = name.trim();
-    if (validKeys.includes("age")) user.age = +age;
-    if (validKeys.includes("email")) user.email = email.trim();
+    // 7. Update only the fields that passed validation in validKeys
+    if (validKeys.includes("name")) {
+      // attching the name key to user object after trimming the extra spaces
+      user.name = name.trim();
+    }
+    if (validKeys.includes("age")) {
+      user.age = +age;
+    }
+    if (validKeys.includes("email")) {
+      user.email = email.trim();
+    }
 
-    // 8. Save the updated users
+    // 8. Save the updated users to users.json file
+    // using the await keyword to wait for the promise to resolve
     await saveUsers(users);
 
     // 9. Return success response (200 OK) and a message with the updated user data field only
@@ -196,7 +215,8 @@ app.patch("/user/:id", async (req, res) => {
 // ================================================
 // (3) DELETE route (eg. /user/1) by ID
 // coming either from the URL or from the request body
-// Express 5 optional param: {/:id} allows both /user/1 (params) and /user (body)
+//  {/:id} is the way to write optional params
+// to allow both /user/1 (params) and /user (body)
 // ================================================
 app.delete("/user{/:id}", async (req, res) => {
   try {
