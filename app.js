@@ -50,15 +50,14 @@ async function saveUsers(users) {
 
 // middleware to Parse incoming JSON requests
 app.use(express.json());
+
 // middleware to catch JSON parsing errors and return a 400 Bad Request response
 app.use((err, req, res, next) => {
-  // Check if an error thrown by express.json() due to invalid JSON syntax
-  if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
-    return res.status(400).json({
-      message: "Invalid JSON syntax. Please check your request body.",
-    });
+  if (err.status === 400) {
+    // syntax errors come with status code 400
+    return res.status(400).json({ message: "invalid json" });
   }
-  next(err);
+  next(err); // if it's not a syntax error, pass it to the next middleware if any
 });
 
 // ================================================
